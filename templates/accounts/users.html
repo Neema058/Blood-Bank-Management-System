@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Manage Users{% endblock %}
+{% block page_title %}<i class="fas fa-users-cog me-2"></i>Manage Users{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 style="font-weight:700;color:var(--dark-red);margin:0;">System Users</h5>
+  <a href="/accounts/users/add/" class="btn btn-primary"><i class="fas fa-user-plus me-2"></i>Add User</a>
+</div>
+<div class="tcard">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>#</th><th>Name</th><th>Username</th><th>Role</th><th>Phone</th><th>Status</th><th>Last Login</th><th>Action</th></tr></thead>
+      <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><strong>{{ u.get_full_name|default:u.username }}</strong></td>
+        <td><code>{{ u.username }}</code></td>
+        <td>
+          {% if u.role == 'admin' %}<span class="badge" style="background:#721c24;color:white;">Admin</span>
+          {% elif u.role == 'lab_technician' %}<span class="badge" style="background:#1565c0;color:white;">Lab Tech</span>
+          {% else %}<span class="badge" style="background:#27AE60;color:white;">Receptionist</span>{% endif %}
+        </td>
+        <td>{{ u.phone|default:"—" }}</td>
+        <td>{% if u.is_active %}<span class="badge badge-available rounded-pill">Active</span>
+        {% else %}<span class="badge badge-rejected rounded-pill">Inactive</span>{% endif %}</td>
+        <td style="font-size:.78rem;">{{ u.last_login|date:"d-M-Y H:i"|default:"Never" }}</td>
+        <td>
+          {% if u != request.user %}
+          <a href="/accounts/users/toggle/{{ u.id }}/" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}" style="border-radius:7px;font-size:.72rem;" onclick="return confirm('Are you sure?')">
+            {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+          </a>
+          {% else %}
+          <span style="font-size:.75rem;color:#888;">You</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" class="text-center text-muted py-3">No users found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

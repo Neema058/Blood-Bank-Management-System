@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Add Donor{% endblock %}
+{% block page_title %}<i class="fas fa-user-plus me-2"></i>Register New Donor{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-8">
+<div class="form-card">
+  <h5 style="color:var(--dark-red);font-weight:700;margin-bottom:20px;">Donor Registration Form</h5>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label">Full Name *</label><input type="text" name="full_name" class="form-control" required placeholder="Muhammad Ali Khan"></div>
+      <div class="col-md-6"><label class="form-label">CNIC *</label><input type="text" name="cnic" class="form-control" required placeholder="35201-1234567-1"></div>
+      <div class="col-md-3"><label class="form-label">Age * (18-65)</label><input type="number" name="age" class="form-control" required min="18" max="65"></div>
+      <div class="col-md-3">
+        <label class="form-label">Gender *</label>
+        <select name="gender" class="form-select" required>
+          <option value="M">Male</option><option value="F">Female</option><option value="O">Other</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Blood Group *</label>
+        <select name="blood_group" class="form-select" required>
+          <option value="">-- Select --</option>
+          <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+          <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+        </select>
+      </div>
+      <div class="col-md-6"><label class="form-label">Phone *</label><input type="text" name="phone" class="form-control" required placeholder="03XX-XXXXXXX"></div>
+      <div class="col-md-6"><label class="form-label">Email</label><input type="email" name="email" class="form-control" placeholder="email@example.com"></div>
+      <div class="col-12"><label class="form-label">Address</label><textarea name="address" class="form-control" rows="2"></textarea></div>
+      <div class="col-12"><label class="form-label">Medical History / Known Conditions</label><textarea name="medical_history" class="form-control" rows="2" placeholder="Any known diseases, medications, allergies..."></textarea></div>
+    </div>
+    <div style="background:#fff5f5;border-radius:10px;padding:12px;margin:16px 0;font-size:.8rem;color:#666;">
+      <i class="fas fa-info-circle me-2" style="color:var(--red);"></i>
+      Eligibility criteria: Age 18-65, weight &gt; 50kg, no chronic illness, last donation at least 56 days ago.
+    </div>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-fill" style="padding:12px;"><i class="fas fa-save me-2"></i>Register Donor</button>
+      <a href="/donors/" class="btn btn-outline-secondary flex-fill" style="border-radius:10px;padding:12px;">Cancel</a>
+    </div>
+  </form>
+</div>
+</div>
+</div>
+{% endblock %}

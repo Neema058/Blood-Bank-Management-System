@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}<i class="fas fa-tachometer-alt me-2"></i>Dashboard{% endblock %}
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<!-- Emergency Alert Banner -->
+{% if emergency_requests %}
+<div class="emergency-banner d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <strong>🚨 EMERGENCY!</strong> {{ emergency_requests.count }} emergency blood request(s) pending!
+    {% for r in emergency_requests %}
+      <span class="badge ms-2" style="background:white;color:#721c24;">{{ r.patient.full_name }} needs {{ r.units_required }} {{ r.blood_group }}</span>
+    {% endfor %}
+  </div>
+  <a href="/requests/?urgency=emergency" class="btn btn-sm" style="background:white;color:#721c24;border-radius:8px;font-weight:600;">View Now →</a>
+</div>
+{% endif %}
+
+<!-- Rare Blood Group Alert -->
+{% if rare_alerts %}
+<div class="alert alert-warning d-flex align-items-center gap-3 mb-3" style="border-radius:12px;">
+  <i class="fas fa-star fa-lg" style="color:#E67E22;"></i>
+  <div>
+    <strong>Rare Blood Group Alert!</strong>
+    {% for ra in rare_alerts %}
+      <span class="badge ms-1" style="background:#E67E22;color:white;">{{ ra.blood_group }}: {{ ra.count }} units</span>
+    {% endfor %}
+    — Stock critically low. Contact rare group donors immediately!
+  </div>
+</div>
+{% endif %}
+
+<!-- Near Expiry Alert -->
+{% if near_expiry %}
+<div class="alert alert-warning d-flex align-items-center gap-3 mb-3" style="border-radius:12px;">
+  <i class="fas fa-clock fa-lg" style="color:#E67E22;"></i>
+  <strong>{{ near_expiry.count }} unit(s)</strong> expiring within 7 days!
+  <a href="/inventory/?status=available" class="btn btn-sm btn-warning ms-auto" style="border-radius:8px;">View →</a>
+</div>
+{% endif %}
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-2">
+    <div class="stat-card text-center">
+      <div class="stat-icon mx-auto" style="background:#fff0f0;color:#C0392B;"><i class="fas fa-users"></i></div>
+      <div class="stat-num">{{ total_donors }}</div>
+      <div class="stat-label">Donors</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="stat-card text-center">
+      <div class="stat-icon mx-auto" style="background:#fff0f0;color:#C0392B;"><i class="fas fa-tint"></i></div>
+      <div class="stat-num">{{ total_donations }}</div>
+      <div class="stat-label">Donations</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="stat-card text-center">
+      <div class="stat-icon mx-auto" style="background:#e8f5e9;color:#27AE60;"><i class="fas fa-warehouse"></i></div>
+      <div class="stat-num">{{ total_available }}</div>
+      <div class="stat-label">Available Units</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="stat-card text-center">
+      <div class="stat-icon mx-auto" style="background:#fff3cd;color:#E67E22;"><i class="fas fa-hand-holding-medical"></i></div>
+      <div class="stat-num">{{ pending_requests }}</div>
+      <div class="stat-label">Pending Req.</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="stat-card text-center">
+      <div class="stat-icon mx-auto" style="background:#f8d7da;color:#721c24;"><i class="fas fa-clock"></i></div>
+      <div class="stat-num">{{ near_expiry.count }}</div>
+      <div class="stat-label">Near Expiry</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-2">
+    <div class="stat-card text-center">
+      <div class="stat-icon mx-auto" style="background:#d1ecf1;color:#0c5460;"><i class="fas fa-hospital-user"></i></div>
+      <div class="stat-num">{{ total_patients }}</div>
+      <div class="stat-label">Patients</div>
+    </div>
+  </div>
+</div>
+
+<!-- Blood Group Stock Cards -->
+<div class="row g-2 mb-4">
+  {% for bg, count in stock.items %}
+  <div class="col-6 col-md-3">
+    <div class="bg-card {% if count < 5 %}critical{% elif count < 10 %}low{% else %}good{% endif %}">
+      <div style="font-size:1.8rem;">🩸</div>
+      <div class="group-name">{{ bg }}</div>
+      <div class="group-count {% if count < 5 %}count-critical{% elif count < 10 %}count-low{% else %}count-good{% endif %}">{{ count }}</div>
+      <div style="font-size:.72rem;color:#888;">units available</div>
+      {% if count < 5 %}<div class="badge badge-expired mt-1">Critical</div>
+      {% elif count < 10 %}<div class="badge" style="background:#fff3cd;color:#856404;">Low</div>
+      {% else %}<div class="badge badge-available mt-1">Good</div>{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Charts + Recent Activity -->
+<div class="row g-3">
+  <div class="col-md-5">
+    <div class="tcard p-4">
+      <h6 style="color:var(--dark-red);font-weight:700;margin-bottom:16px;"><i class="fas fa-chart-donut me-2"></i>Stock by Blood Group</h6>
+      <canvas id="stockChart" height="220"></canvas>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="tcard p-4">
+      <h6 style="color:var(--dark-red);font-weight:700;margin-bottom:16px;"><i class="fas fa-chart-bar me-2"></i>Monthly Donations ({{ today.year }})</h6>
+      <canvas id="monthlyChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- Recent Donations -->
+  <div class="col-md-6">
+    <div class="tcard">
+      <div class="tcard-header">
+        <span><i class="fas fa-tint me-2"></i>Recent Donations</span>
+        <a href="/donations/" style="color:rgba(255,255,255,.7);font-size:.76rem;">View All →</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead><tr><th>Donor</th><th>Blood Group</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for d in recent_donations %}
+          <tr>
+            <td>{{ d.donor.full_name }}</td>
+            <td><span class="badge bg-group">{{ d.blood_group }}</span></td>
+            <td>{{ d.donation_date|date:"d-M-Y" }}</td>
+            <td>
+              {% if d.status == 'accepted' %}<span class="badge badge-available rounded-pill">Accepted</span>
+              {% else %}<span class="badge badge-rejected rounded-pill">Rejected</span>{% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-3">No donations yet</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Requests -->
+  <div class="col-md-6">
+    <div class="tcard">
+      <div class="tcard-header">
+        <span><i class="fas fa-hand-holding-medical me-2"></i>Recent Requests</span>
+        <a href="/requests/" style="color:rgba(255,255,255,.7);font-size:.76rem;">View All →</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead><tr><th>Patient</th><th>Group</th><th>Urgency</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for r in recent_requests %}
+          <tr {% if r.urgency == 'emergency' %}style="background:#fff5f5;"{% endif %}>
+            <td>{{ r.patient.full_name }}</td>
+            <td><span class="badge bg-group">{{ r.blood_group }}</span></td>
+            <td>
+              {% if r.urgency == 'emergency' %}<span class="badge badge-emergency rounded-pill">Emergency</span>
+              {% elif r.urgency == 'urgent' %}<span class="badge badge-urgent rounded-pill">Urgent</span>
+              {% else %}<span class="badge badge-normal rounded-pill">Normal</span>{% endif %}
+            </td>
+            <td>
+              {% if r.status == 'fulfilled' %}<span class="badge badge-fulfilled rounded-pill">Fulfilled</span>
+              {% elif r.status == 'pending' %}<span class="badge badge-pending rounded-pill">Pending</span>
+              {% elif r.status == 'rejected' %}<span class="badge badge-rejected rounded-pill">Rejected</span>
+              {% else %}<span class="badge badge-available rounded-pill">Approved</span>{% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-3">No requests yet</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const stockLabels = {{ stock_labels|safe }};
+const stockValues = {{ stock_values|safe }};
+new Chart(document.getElementById('stockChart'), {
+  type: 'doughnut',
+  data: {
+    labels: stockLabels,
+    datasets: [{ data: stockValues,
+      backgroundColor: ['#C0392B','#922B21','#E74C3C','#D35400','#E67E22','#8B0000','#F39C12','#CB4335'],
+      borderWidth: 2, borderColor: '#fff'
+    }]
+  },
+  options: { responsive:true, plugins:{ legend:{ position:'bottom', labels:{ font:{ family:'Poppins', size:11 } } } } }
+});
+
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const monthly = {{ monthly_data|safe }};
+new Chart(document.getElementById('monthlyChart'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [{ label: 'Donations', data: monthly,
+      backgroundColor: 'rgba(192,57,43,0.75)', borderRadius: 6,
+    }]
+  },
+  options: { responsive:true, plugins:{ legend:{ display:false } },
+    scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 } } }
+  }
+});
+</script>
+{% endblock %}

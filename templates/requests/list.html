@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Blood Requests{% endblock %}
+{% block page_title %}<i class="fas fa-hand-holding-medical me-2"></i>Blood Requests{% endblock %}
+{% block content %}
+
+{% if emergency_count %}
+<div class="emergency-banner mb-3">
+  <i class="fas fa-exclamation-triangle me-2"></i>
+  <strong>🚨 {{ emergency_count }} EMERGENCY REQUEST(S) PENDING!</strong> — Handle immediately!
+</div>
+{% endif %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 style="font-weight:700;color:var(--dark-red);margin:0;">All Blood Requests</h5>
+  <a href="/requests/add/" class="btn btn-primary"><i class="fas fa-plus me-2"></i>New Request</a>
+</div>
+
+<!-- Filter -->
+<div class="tcard mb-3 p-3">
+  <form method="GET" class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <select name="status" class="form-select">
+        <option value="">All Status</option>
+        <option value="pending"   {% if status_f == 'pending' %}selected{% endif %}>Pending</option>
+        <option value="fulfilled" {% if status_f == 'fulfilled' %}selected{% endif %}>Fulfilled</option>
+        <option value="rejected"  {% if status_f == 'rejected' %}selected{% endif %}>Rejected</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <select name="urgency" class="form-select">
+        <option value="">All Urgency</option>
+        <option value="emergency" {% if urgency_f == 'emergency' %}selected{% endif %}>Emergency</option>
+        <option value="urgent"    {% if urgency_f == 'urgent' %}selected{% endif %}>Urgent</option>
+        <option value="normal"    {% if urgency_f == 'normal' %}selected{% endif %}>Normal</option>
+      </select>
+    </div>
+    <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Filter</button></div>
+  </form>
+</div>
+
+<div class="tcard">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Req#</th><th>Patient</th><th>Hospital</th><th>Blood Group</th><th>Units</th><th>Urgency</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+      <tbody>
+      {% for r in requests %}
+      <tr {% if r.urgency == 'emergency' and r.status == 'pending' %}style="background:#fff0f0;"{% endif %}>
+        <td><code>#{{ r.id }}</code></td>
+        <td><a href="/patients/{{ r.patient.id }}/" style="color:var(--red);font-weight:600;">{{ r.patient.full_name }}</a></td>
+        <td style="font-size:.78rem;">{{ r.patient.hospital_name }}</td>
+        <td><span class="badge bg-group">{{ r.blood_group }}</span></td>
+        <td><strong>{{ r.units_required }}</strong></td>
+        <td>
+          {% if r.urgency == 'emergency' %}<span class="badge badge-emergency rounded-pill">🚨 Emergency</span>
+          {% elif r.urgency == 'urgent' %}<span class="badge badge-urgent rounded-pill">⚡ Urgent</span>
+          {% else %}<span class="badge badge-normal rounded-pill">Normal</span>{% endif %}
+        </td>
+        <td>
+          {% if r.status == 'fulfilled' %}<span class="badge badge-fulfilled rounded-pill">✓ Fulfilled</span>
+          {% elif r.status == 'pending' %}<span class="badge badge-pending rounded-pill">Pending</span>
+          {% elif r.status == 'rejected' %}<span class="badge badge-rejected rounded-pill">Rejected</span>
+          {% else %}<span class="badge badge-available rounded-pill">Approved</span>{% endif %}
+        </td>
+        <td>{{ r.request_date|date:"d-M-Y" }}</td>
+        <td>
+          {% if r.status == 'pending' %}
+          <a href="/requests/{{ r.id }}/" class="btn btn-sm btn-primary" style="font-size:.72rem;border-radius:7px;">Process</a>
+          {% else %}
+          <a href="/requests/{{ r.id }}/" class="btn btn-sm btn-outline-primary" style="font-size:.72rem;border-radius:7px;">View</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9" class="text-center text-muted py-4">No requests found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Inventory Report{% endblock %}
+{% block page_title %}<i class="fas fa-warehouse me-2"></i>Inventory Report{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 style="font-weight:700;color:var(--dark-red);margin:0;">Blood Inventory Report</h5>
+  <a href="/reports/inventory/?export=pdf&status={{ status_f }}" class="btn btn-primary"><i class="fas fa-file-pdf me-2"></i>Export PDF</a>
+</div>
+<div class="tcard mb-3 p-3">
+  <form method="GET" class="row g-2">
+    <div class="col-md-4">
+      <select name="status" class="form-select" onchange="this.form.submit()">
+        <option value="available" {% if status_f == 'available' %}selected{% endif %}>Available Units</option>
+        <option value="issued"    {% if status_f == 'issued' %}selected{% endif %}>Issued Units</option>
+        <option value="expired"   {% if status_f == 'expired' %}selected{% endif %}>Expired Units</option>
+        <option value="">All Units</option>
+      </select>
+    </div>
+  </form>
+</div>
+<div class="tcard">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>#</th><th>Unit ID</th><th>Blood Group</th><th>Collected</th><th>Expiry</th><th>Days Left</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for u in units %}
+      <tr {% if u.expiry_status == 'critical' and u.status == 'available' %}style="background:#fff5f5;"{% endif %}>
+        <td>{{ forloop.counter }}</td>
+        <td><code>#{{ u.id }}</code></td>
+        <td><span class="badge bg-group">{{ u.blood_group }}</span></td>
+        <td>{{ u.collected_date|date:"d-M-Y" }}</td>
+        <td>{{ u.expiry_date|date:"d-M-Y" }}</td>
+        <td>{% with days=u.days_to_expiry %}
+          {% if days < 0 %}<span style="color:#721c24;font-weight:700;">Expired</span>
+          {% elif days <= 7 %}<span style="color:#E67E22;font-weight:700;">{{ days }}d ⚠</span>
+          {% else %}<span style="color:#27AE60;">{{ days }}d</span>{% endif %}
+        {% endwith %}</td>
+        <td>
+          {% if u.status == 'available' %}<span class="badge badge-available rounded-pill">Available</span>
+          {% elif u.status == 'issued' %}<span class="badge badge-issued rounded-pill">Issued</span>
+          {% else %}<span class="badge badge-expired rounded-pill">Expired</span>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-center text-muted py-3">No units found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}<i class="fas fa-chart-bar me-2"></i>Reports{% endblock %}
+{% block content %}
+<h5 style="font-weight:700;color:var(--dark-red);margin-bottom:20px;">Generate Reports</h5>
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="tcard p-4 text-center" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:2.5rem;color:var(--red);margin-bottom:12px;"><i class="fas fa-users"></i></div>
+      <h6 style="font-weight:700;color:var(--dark-red);">Donor Report</h6>
+      <p style="font-size:.82rem;color:#888;">All donors with eligibility status</p>
+      <a href="/reports/donors/" class="btn btn-primary w-100">View Report</a>
+      <a href="/reports/donors/?export=pdf" class="btn btn-outline-primary w-100 mt-2"><i class="fas fa-file-pdf me-2"></i>Export PDF</a>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="tcard p-4 text-center" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:2.5rem;color:#27AE60;margin-bottom:12px;"><i class="fas fa-warehouse"></i></div>
+      <h6 style="font-weight:700;color:var(--dark-red);">Inventory Report</h6>
+      <p style="font-size:.82rem;color:#888;">Blood stock, expiry tracking</p>
+      <a href="/reports/inventory/" class="btn btn-primary w-100">View Report</a>
+      <a href="/reports/inventory/?export=pdf" class="btn btn-outline-primary w-100 mt-2"><i class="fas fa-file-pdf me-2"></i>Export PDF</a>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="tcard p-4 text-center" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:2.5rem;color:#1565c0;margin-bottom:12px;"><i class="fas fa-hand-holding-medical"></i></div>
+      <h6 style="font-weight:700;color:var(--dark-red);">Request Report</h6>
+      <p style="font-size:.82rem;color:#888;">All blood requests & outcomes</p>
+      <a href="/reports/requests/" class="btn btn-primary w-100">View Report</a>
+      <a href="/reports/requests/?export=pdf" class="btn btn-outline-primary w-100 mt-2"><i class="fas fa-file-pdf me-2"></i>Export PDF</a>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="tcard p-4 text-center" style="cursor:pointer;transition:transform .2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+      <div style="font-size:2.5rem;color:#6a1b9a;margin-bottom:12px;"><i class="fas fa-calendar-alt"></i></div>
+      <h6 style="font-weight:700;color:var(--dark-red);">Monthly Summary</h6>
+      <p style="font-size:.82rem;color:#888;">Month-wise donations & requests</p>
+      <a href="/reports/monthly/" class="btn btn-primary w-100">View Report</a>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="tcard p-4">
+      <h6 style="font-weight:700;color:var(--dark-red);margin-bottom:14px;"><i class="fas fa-info-circle me-2"></i>Report Guide</h6>
+      <div class="info-row"><span class="info-label">Donor Report</span><span class="info-value">Eligibility, last donation</span></div>
+      <div class="info-row"><span class="info-label">Inventory Report</span><span class="info-value">Stock levels, near-expiry</span></div>
+      <div class="info-row"><span class="info-label">Request Report</span><span class="info-value">Pending, fulfilled, rejected</span></div>
+      <div class="info-row"><span class="info-label">Monthly Summary</span><span class="info-value">Year-wise monthly trends</span></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

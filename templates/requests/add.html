@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}New Blood Request{% endblock %}
+{% block page_title %}<i class="fas fa-plus me-2"></i>New Blood Request{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-md-7">
+<div class="form-card">
+  <h5 style="color:var(--dark-red);font-weight:700;margin-bottom:20px;">Blood Request Form</h5>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row g-3">
+
+      {% if is_patient_view %}
+      <!-- Patient view: patient is fixed, no dropdown -->
+      <div class="col-12">
+        <div style="background:#fff5f5;border-radius:10px;padding:14px 16px;font-size:.85rem;">
+          <i class="fas fa-user-circle me-2" style="color:var(--red);"></i>
+          Requesting for: <strong>{{ selected_patient.full_name }}</strong>
+          <span style="margin-left:8px;background:var(--dark-red);color:white;border-radius:6px;padding:2px 8px;font-size:.75rem;font-weight:700;">{{ selected_patient.blood_group }}</span>
+          <br><small style="color:#aaa;margin-top:4px;display:block;">{{ selected_patient.hospital_name }}</small>
+        </div>
+        <input type="hidden" name="patient_id" value="{{ selected_patient.id }}">
+      </div>
+      {% else %}
+      <!-- Staff view: select patient -->
+      <div class="col-12">
+        <label class="form-label">Select Patient *</label>
+        <select name="patient_id" class="form-select" required>
+          <option value="">-- Select Patient --</option>
+          {% for p in patients %}
+          <option value="{{ p.id }}">{{ p.full_name }} ({{ p.blood_group }}) — {{ p.hospital_name }}</option>
+          {% endfor %}
+        </select>
+        <div class="form-text">Patient not registered? <a href="/patients/add/" style="color:var(--red);">Register first →</a></div>
+      </div>
+      {% endif %}
+
+      <div class="col-md-6">
+        <label class="form-label">Blood Group Required *</label>
+        <select name="blood_group" class="form-select" required>
+          <option value="">-- Select --</option>
+          <option {% if selected_patient.blood_group == 'A+' %}selected{% endif %}>A+</option>
+          <option {% if selected_patient.blood_group == 'A-' %}selected{% endif %}>A-</option>
+          <option {% if selected_patient.blood_group == 'B+' %}selected{% endif %}>B+</option>
+          <option {% if selected_patient.blood_group == 'B-' %}selected{% endif %}>B-</option>
+          <option {% if selected_patient.blood_group == 'O+' %}selected{% endif %}>O+</option>
+          <option {% if selected_patient.blood_group == 'O-' %}selected{% endif %}>O-</option>
+          <option {% if selected_patient.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+          <option {% if selected_patient.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Units Required *</label>
+        <input type="number" name="units_required" class="form-control" value="1" min="1" max="20" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Urgency Level *</label>
+        <select name="urgency" class="form-select" required>
+          <option value="normal">Normal</option>
+          <option value="urgent">Urgent</option>
+          <option value="emergency">🚨 Emergency</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <label class="form-label">Notes</label>
+        <textarea name="notes" class="form-control" rows="2" placeholder="Any additional notes..."></textarea>
+      </div>
+    </div>
+    <div style="background:#fff5f5;border-radius:10px;padding:12px;margin:16px 0;font-size:.8rem;">
+      <i class="fas fa-exclamation-triangle me-2" style="color:var(--red);"></i>
+      Selecting <strong>Emergency</strong> will trigger an immediate alert on the admin dashboard.
+    </div>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-fill" style="padding:12px;"><i class="fas fa-paper-plane me-2"></i>Submit Request</button>
+      <a href="{% if is_patient_view %}/patient-portal/{% else %}/requests/{% endif %}" class="btn btn-outline-secondary flex-fill" style="border-radius:10px;padding:12px;">Cancel</a>
+    </div>
+  </form>
+</div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Patient Registration | Blood Bank</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { font-family:'Poppins',sans-serif; box-sizing:border-box; }
+body { min-height:100vh; background:linear-gradient(135deg,#5a0000,#8b0000,#C0392B); padding:30px 16px; }
+.reg-card { background:white; border-radius:20px; max-width:760px; margin:0 auto; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.4); }
+.reg-header { background:linear-gradient(90deg,#5a0000,#C0392B); padding:28px 36px; color:white; }
+.reg-header h4 { margin:0; font-weight:700; font-size:1.2rem; }
+.reg-header p  { margin:4px 0 0; opacity:.75; font-size:.82rem; }
+.reg-body { padding:30px 36px; }
+.section-label { font-size:.7rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#C0392B; margin:20px 0 12px; padding-bottom:6px; border-bottom:1px solid #fad7d7; }
+.form-label { font-size:.82rem; color:#555; font-weight:600; margin-bottom:4px; }
+.form-control, .form-select { border-radius:9px; border:1.5px solid #fad7d7; padding:9px 14px; font-size:.86rem; }
+.form-control:focus, .form-select:focus { border-color:#C0392B; box-shadow:0 0 0 3px rgba(192,57,43,.12); }
+.btn-register { background:linear-gradient(90deg,#922B21,#C0392B); color:white; border:none; border-radius:10px; padding:12px 30px; font-size:.92rem; font-weight:700; width:100%; transition:.2s; }
+.btn-register:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(192,57,43,.4); color:white; }
+.req { color:#C0392B; }
+.info-box { background:#fff5f5; border-radius:10px; padding:12px 16px; font-size:.78rem; color:#888; margin-bottom:18px; border-left:3px solid #C0392B; }
+@media(max-width:600px){ .reg-body{ padding:20px 18px; } }
+</style>
+</head>
+<body>
+<div class="reg-card">
+  <div class="reg-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:2.2rem;">🩸</span>
+      <div>
+        <h4>Patient Self-Registration</h4>
+        <p>Apna account banayein — ghar se blood request karain</p>
+      </div>
+    </div>
+  </div>
+  <div class="reg-body">
+
+    {% if messages %}
+    {% for msg in messages %}
+    <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}{{ msg.tags }}{% endif %} py-2 mb-3" style="border-radius:10px;font-size:.83rem;">
+      <i class="fas fa-exclamation-circle me-2"></i>{{ msg }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="info-box">
+      <i class="fas fa-info-circle me-1" style="color:#C0392B;"></i>
+      Yeh form patient apne aap bhar sakta hai. Hospital mein hona zaroori nahi — ghar se bhi register karein aur blood request submit karein.
+    </div>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- Login Details -->
+      <div class="section-label"><i class="fas fa-lock me-2"></i>Login Details</div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">First Name <span class="req">*</span></label>
+          <input type="text" name="first_name" class="form-control" placeholder="Ali" required value="{{ request.POST.first_name }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Last Name <span class="req">*</span></label>
+          <input type="text" name="last_name" class="form-control" placeholder="Ahmed" value="{{ request.POST.last_name }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Username <span class="req">*</span></label>
+          <input type="text" name="username" class="form-control" placeholder="ali_ahmed" required value="{{ request.POST.username }}">
+          <div class="form-text" style="font-size:.73rem;">Login ke liye use hoga. Koi bhi unique naam.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Phone Number</label>
+          <input type="text" name="phone" class="form-control" placeholder="03001234567" value="{{ request.POST.phone }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Password <span class="req">*</span></label>
+          <div class="input-group">
+            <input type="password" name="password" id="pwd1" class="form-control" placeholder="Min 6 characters" required>
+            <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('pwd1','e1')" style="border-radius:0 9px 9px 0;border-color:#fad7d7;">
+              <i class="fas fa-eye" id="e1"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Confirm Password <span class="req">*</span></label>
+          <div class="input-group">
+            <input type="password" name="confirm_password" id="pwd2" class="form-control" placeholder="Dobara likhein" required>
+            <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('pwd2','e2')" style="border-radius:0 9px 9px 0;border-color:#fad7d7;">
+              <i class="fas fa-eye" id="e2"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patient Info -->
+      <div class="section-label"><i class="fas fa-hospital-user me-2"></i>Patient Information</div>
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="form-label">Full Name (as on ID) <span class="req">*</span></label>
+          <input type="text" name="full_name" class="form-control" placeholder="Muhammad Ali Ahmed" value="{{ request.POST.full_name }}">
+          <div class="form-text" style="font-size:.73rem;">Khali chhorein toh First + Last Name use hoga.</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Age <span class="req">*</span></label>
+          <input type="number" name="age" class="form-control" placeholder="25" min="1" max="120" required value="{{ request.POST.age }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Gender <span class="req">*</span></label>
+          <select name="gender" class="form-select" required>
+            <option value="M" {% if request.POST.gender == 'M' %}selected{% endif %}>Male</option>
+            <option value="F" {% if request.POST.gender == 'F' %}selected{% endif %}>Female</option>
+            <option value="O" {% if request.POST.gender == 'O' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Blood Group <span class="req">*</span></label>
+          <select name="blood_group" class="form-select" required>
+            <option value="">-- Select --</option>
+            <option value="A+"  {% if request.POST.blood_group == 'A+' %}selected{% endif %}>A+</option>
+            <option value="A-"  {% if request.POST.blood_group == 'A-' %}selected{% endif %}>A-</option>
+            <option value="B+"  {% if request.POST.blood_group == 'B+' %}selected{% endif %}>B+</option>
+            <option value="B-"  {% if request.POST.blood_group == 'B-' %}selected{% endif %}>B-</option>
+            <option value="O+"  {% if request.POST.blood_group == 'O+' %}selected{% endif %}>O+</option>
+            <option value="O-"  {% if request.POST.blood_group == 'O-' %}selected{% endif %}>O-</option>
+            <option value="AB+" {% if request.POST.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+            <option value="AB-" {% if request.POST.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Hospital / Clinic (Optional)</label>
+          <input type="text" name="hospital_name" class="form-control" placeholder="Ghar se request hai toh khali chorein" value="{{ request.POST.hospital_name }}">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Doctor Name (Optional)</label>
+          <input type="text" name="doctor_name" class="form-control" placeholder="Dr. Name" value="{{ request.POST.doctor_name }}">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Address</label>
+          <textarea name="address" class="form-control" rows="2" placeholder="Ghar ka pata...">{{ request.POST.address }}</textarea>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <button type="submit" class="btn-register">
+          <i class="fas fa-user-plus me-2"></i>Register & Create Account
+        </button>
+      </div>
+    </form>
+
+    <div style="text-align:center;margin-top:16px;font-size:.82rem;color:#888;">
+      Pehle se account hai? <a href="/accounts/login/" style="color:#C0392B;font-weight:600;">Login karein →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePwd(id, eid) {
+  const p = document.getElementById(id), e = document.getElementById(eid);
+  p.type = p.type==='password' ? 'text' : 'password';
+  e.className = p.type==='password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

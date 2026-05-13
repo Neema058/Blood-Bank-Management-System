@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Edit Patient{% endblock %}
+{% block page_title %}<i class="fas fa-edit me-2"></i>Edit Patient{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-7">
+<div class="form-card">
+  <h5 style="color:var(--dark-red);font-weight:700;margin-bottom:20px;">Edit Patient — {{ patient.full_name }}</h5>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-8"><label class="form-label">Full Name</label><input type="text" name="full_name" class="form-control" value="{{ patient.full_name }}" required></div>
+      <div class="col-md-4"><label class="form-label">Contact</label><input type="text" name="contact" class="form-control" value="{{ patient.contact }}"></div>
+      <div class="col-md-8"><label class="form-label">Hospital Name</label><input type="text" name="hospital_name" class="form-control" value="{{ patient.hospital_name }}" required></div>
+      <div class="col-md-4"><label class="form-label">Doctor Name</label><input type="text" name="doctor_name" class="form-control" value="{{ patient.doctor_name }}"></div>
+      <div class="col-12"><label class="form-label">Address</label><textarea name="address" class="form-control" rows="2">{{ patient.address }}</textarea></div>
+    </div>
+    <div class="d-flex gap-2 mt-4">
+      <button type="submit" class="btn btn-primary flex-fill" style="padding:12px;"><i class="fas fa-save me-2"></i>Save Changes</button>
+      <a href="/patients/{{ patient.id }}/" class="btn btn-outline-secondary flex-fill" style="border-radius:10px;padding:12px;">Cancel</a>
+    </div>
+  </form>
+</div>
+</div></div>
+{% endblock %}

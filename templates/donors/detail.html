@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}{{ donor.full_name }}{% endblock %}
+{% block page_title %}<i class="fas fa-user me-2"></i>Donor Profile{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="form-card text-center" style="background:linear-gradient(160deg,#5a0000,#C0392B);color:white;">
+      <div style="font-size:60px;margin-bottom:12px;">🩸</div>
+      <h5 style="font-weight:700;margin:0;">{{ donor.full_name }}</h5>
+      <p style="opacity:.7;font-size:.83rem;margin:4px 0;">Donor ID: #{{ donor.donor_id }}</p>
+      <span class="badge" style="background:white;color:var(--dark-red);font-size:.9rem;padding:6px 16px;margin-top:6px;">{{ donor.blood_group }}</span>
+      {% if donor.is_rare_group %}<br><span class="badge mt-2" style="background:#E67E22;color:white;">⭐ Rare Group</span>{% endif %}
+      <hr style="border-color:rgba(255,255,255,.2);margin:16px 0;">
+      <div style="text-align:left;font-size:.83rem;">
+        <div class="info-row" style="border-color:rgba(255,255,255,.2);"><span style="opacity:.7;">CNIC</span><span>{{ donor.cnic }}</span></div>
+        <div class="info-row" style="border-color:rgba(255,255,255,.2);"><span style="opacity:.7;">Age</span><span>{{ donor.age }} years</span></div>
+        <div class="info-row" style="border-color:rgba(255,255,255,.2);"><span style="opacity:.7;">Gender</span><span>{{ donor.get_gender_display }}</span></div>
+        <div class="info-row" style="border-color:rgba(255,255,255,.2);"><span style="opacity:.7;">Phone</span><span>{{ donor.phone }}</span></div>
+        <div class="info-row" style="border-color:rgba(255,255,255,.2);"><span style="opacity:.7;">Total Donations</span><span>{{ donor.total_donations }}</span></div>
+      </div>
+      <div class="mt-3 d-flex gap-2">
+        <a href="/donors/{{ donor.donor_id }}/edit/" class="btn btn-warning btn-sm flex-fill" style="border-radius:8px;">Edit</a>
+        <a href="/donations/add/?donor={{ donor.donor_id }}" class="btn btn-sm flex-fill" style="background:white;color:var(--dark-red);border-radius:8px;font-weight:600;">+ Donation</a>
+      </div>
+    </div>
+
+    <!-- Eligibility Card -->
+    <div class="form-card mt-3">
+      <h6 style="color:var(--dark-red);font-weight:700;margin-bottom:14px;"><i class="fas fa-check-circle me-2"></i>Eligibility Status</h6>
+      {% if donor.is_eligible %}
+      <div style="background:#d4edda;border-radius:10px;padding:16px;text-align:center;">
+        <div style="font-size:2rem;">✅</div>
+        <div style="font-weight:700;color:#155724;font-size:1rem;">ELIGIBLE</div>
+        <div style="font-size:.8rem;color:#666;margin-top:4px;">Ready to donate blood</div>
+      </div>
+      {% else %}
+      <div style="background:#f8d7da;border-radius:10px;padding:16px;text-align:center;">
+        <div style="font-size:2rem;">⏳</div>
+        <div style="font-weight:700;color:#721c24;font-size:1rem;">NOT ELIGIBLE</div>
+        <div style="font-size:.8rem;color:#666;margin-top:4px;">{{ donor.days_until_eligible }} days remaining</div>
+      </div>
+      {% endif %}
+      <div class="info-row mt-3"><span class="info-label">Last Donation</span><span class="info-value">{{ donor.last_donation|date:"d-M-Y"|default:"Never" }}</span></div>
+      <div class="info-row"><span class="info-label">Min. Gap Required</span><span class="info-value">56 days</span></div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    {% if donor.medical_history %}
+    <div class="form-card mb-3">
+      <h6 style="color:var(--dark-red);font-weight:700;"><i class="fas fa-notes-medical me-2"></i>Medical History</h6>
+      <p style="color:#555;font-size:.85rem;margin:0;">{{ donor.medical_history }}</p>
+    </div>
+    {% endif %}
+
+    <div class="tcard">
+      <div class="tcard-header"><span><i class="fas fa-tint me-2"></i>Donation History ({{ donations.count }} total)</span></div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead><tr><th>Date</th><th>Volume</th><th>HIV</th><th>Hep B</th><th>Hep C</th><th>Malaria</th><th>Syphilis</th><th>Result</th></tr></thead>
+          <tbody>
+          {% for d in donations %}
+          <tr>
+            <td>{{ d.donation_date|date:"d-M-Y" }}</td>
+            <td>{{ d.volume_ml }} ml</td>
+            <td>{% if d.hiv_test == 'pass' %}<span style="color:green;">✓</span>{% else %}<span style="color:red;">✗</span>{% endif %}</td>
+            <td>{% if d.hep_b_test == 'pass' %}<span style="color:green;">✓</span>{% else %}<span style="color:red;">✗</span>{% endif %}</td>
+            <td>{% if d.hep_c_test == 'pass' %}<span style="color:green;">✓</span>{% else %}<span style="color:red;">✗</span>{% endif %}</td>
+            <td>{% if d.malaria_test == 'pass' %}<span style="color:green;">✓</span>{% else %}<span style="color:red;">✗</span>{% endif %}</td>
+            <td>{% if d.syphilis_test == 'pass' %}<span style="color:green;">✓</span>{% else %}<span style="color:red;">✗</span>{% endif %}</td>
+            <td>
+              {% if d.status == 'accepted' %}<span class="badge badge-available rounded-pill">Accepted</span>
+              {% else %}<span class="badge badge-rejected rounded-pill">Rejected</span>{% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" class="text-center text-muted py-3">No donations recorded yet</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

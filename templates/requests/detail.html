@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Request #{{ req.id }}{% endblock %}
+{% block page_title %}<i class="fas fa-hand-holding-medical me-2"></i>Process Request #{{ req.id }}{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-md-5">
+    <div class="form-card" style="{% if req.urgency == 'emergency' %}background:linear-gradient(160deg,#5a0000,#C0392B);color:white;{% endif %}">
+      {% if req.urgency == 'emergency' %}
+      <div class="text-center mb-3" style="font-size:2.5rem;">🚨</div>
+      <h5 style="text-align:center;font-weight:700;margin-bottom:20px;">EMERGENCY REQUEST</h5>
+      {% else %}
+      <h5 style="color:var(--dark-red);font-weight:700;margin-bottom:20px;">Request Details</h5>
+      {% endif %}
+      <div class="info-row {% if req.urgency == 'emergency' %}" style="border-color:rgba(255,255,255,.2){% endif %}">
+        <span class="info-label" {% if req.urgency == 'emergency' %}style="opacity:.7"{% endif %}>Request ID</span>
+        <span class="info-value" {% if req.urgency == 'emergency' %}style="color:white"{% endif %}>#{{ req.id }}</span>
+      </div>
+      <div class="info-row {% if req.urgency == 'emergency' %}" style="border-color:rgba(255,255,255,.2){% endif %}">
+        <span class="info-label" {% if req.urgency == 'emergency' %}style="opacity:.7"{% endif %}>Patient</span>
+        <span class="info-value" {% if req.urgency == 'emergency' %}style="color:white"{% endif %}>{{ req.patient.full_name }}</span>
+      </div>
+      <div class="info-row {% if req.urgency == 'emergency' %}" style="border-color:rgba(255,255,255,.2){% endif %}">
+        <span class="info-label" {% if req.urgency == 'emergency' %}style="opacity:.7"{% endif %}>Hospital</span>
+        <span class="info-value" {% if req.urgency == 'emergency' %}style="color:white"{% endif %}>{{ req.patient.hospital_name }}</span>
+      </div>
+      <div class="info-row {% if req.urgency == 'emergency' %}" style="border-color:rgba(255,255,255,.2){% endif %}">
+        <span class="info-label" {% if req.urgency == 'emergency' %}style="opacity:.7"{% endif %}>Blood Group</span>
+        <span class="info-value" {% if req.urgency == 'emergency' %}style="color:white"{% endif %}>
+          <span class="badge bg-group" style="font-size:.9rem;">{{ req.blood_group }}</span>
+        </span>
+      </div>
+      <div class="info-row {% if req.urgency == 'emergency' %}" style="border-color:rgba(255,255,255,.2){% endif %}">
+        <span class="info-label" {% if req.urgency == 'emergency' %}style="opacity:.7"{% endif %}>Units Required</span>
+        <span class="info-value" {% if req.urgency == 'emergency' %}style="color:white"{% endif %}>{{ req.units_required }}</span>
+      </div>
+      <div class="info-row {% if req.urgency == 'emergency' %}" style="border-color:rgba(255,255,255,.2){% endif %}">
+        <span class="info-label" {% if req.urgency == 'emergency' %}style="opacity:.7"{% endif %}>Urgency</span>
+        <span class="info-value">
+          {% if req.urgency == 'emergency' %}<span class="badge badge-emergency rounded-pill">Emergency</span>
+          {% elif req.urgency == 'urgent' %}<span class="badge badge-urgent rounded-pill">Urgent</span>
+          {% else %}<span class="badge badge-normal rounded-pill">Normal</span>{% endif %}
+        </span>
+      </div>
+      <div class="info-row {% if req.urgency == 'emergency' %}" style="border-color:rgba(255,255,255,.2){% endif %}">
+        <span class="info-label" {% if req.urgency == 'emergency' %}style="opacity:.7"{% endif %}>Status</span>
+        <span class="info-value">
+          {% if req.status == 'pending' %}<span class="badge badge-pending rounded-pill">Pending</span>
+          {% elif req.status == 'fulfilled' %}<span class="badge badge-fulfilled rounded-pill">Fulfilled</span>
+          {% else %}<span class="badge badge-rejected rounded-pill">Rejected</span>{% endif %}
+        </span>
+      </div>
+      <div class="info-row {% if req.urgency == 'emergency' %}" style="border-color:rgba(255,255,255,.2){% endif %}">
+        <span class="info-label" {% if req.urgency == 'emergency' %}style="opacity:.7"{% endif %}>Available Now</span>
+        <span class="info-value" {% if req.urgency == 'emergency' %}style="color:white"{% endif %}>
+          {% if available_units.count >= req.units_required %}
+          <span style="color:{% if req.urgency == 'emergency' %}#90EE90{% else %}#27AE60{% endif %};font-weight:700;">{{ available_units.count }} units ✓</span>
+          {% else %}
+          <span style="color:{% if req.urgency == 'emergency' %}#FFB3B3{% else %}#C0392B{% endif %};font-weight:700;">Only {{ available_units.count }} units!</span>
+          {% endif %}
+        </span>
+      </div>
+      {% if req.notes %}
+      <div class="mt-3" style="font-size:.83rem;{% if req.urgency == 'emergency' %}opacity:.8;{% endif %}">
+        <strong>Notes:</strong> {{ req.notes }}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if req.status == 'pending' and can_approve %}
+    <div class="form-card mt-3">
+      <h6 style="color:var(--dark-red);font-weight:700;margin-bottom:14px;">Take Action</h6>
+      <form method="POST" action="/requests/{{ req.id }}/action/">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label" style="font-size:.83rem;">Rejection Reason (if rejecting)</label>
+          <textarea name="rejection_reason" class="form-control" rows="2" placeholder="Reason for rejection..."></textarea>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" name="action" value="approve" class="btn btn-success flex-fill" style="border-radius:10px;font-weight:600;">
+            <i class="fas fa-check me-2"></i>Fulfill Request
+          </button>
+          <button type="submit" name="action" value="reject" class="btn btn-danger flex-fill" style="border-radius:10px;font-weight:600;">
+            <i class="fas fa-times me-2"></i>Reject
+          </button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-md-7">
+    <div class="tcard">
+      <div class="tcard-header">
+        <span><i class="fas fa-vials me-2"></i>Available {{ req.blood_group }} Units (FIFO Order)</span>
+        <span class="badge" style="background:white;color:var(--dark-red);">{{ available_units.count }} units</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead><tr><th>Unit ID</th><th>Collected</th><th>Expiry</th><th>Days Left</th></tr></thead>
+          <tbody>
+          {% for u in available_units %}
+          <tr {% if forloop.counter <= req.units_required %}style="background:#e8f5e9;"{% endif %}>
+            <td><code>#{{ u.id }}</code> {% if forloop.counter <= req.units_required %}<span class="badge badge-available" style="font-size:.6rem;">Will Issue</span>{% endif %}</td>
+            <td>{{ u.collected_date|date:"d-M-Y" }}</td>
+            <td>{{ u.expiry_date|date:"d-M-Y" }}</td>
+            <td>
+              {% with days=u.days_to_expiry %}
+              {% if days <= 7 %}<span style="color:#E67E22;font-weight:700;">{{ days }}d ⚠</span>
+              {% else %}<span style="color:#27AE60;">{{ days }}d</span>{% endif %}
+              {% endwith %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="text-center text-muted py-3">
+            No {{ req.blood_group }} units available in inventory!
+          </td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

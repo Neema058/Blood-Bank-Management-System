@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Monthly Report{% endblock %}
+{% block page_title %}<i class="fas fa-calendar-alt me-2"></i>Monthly Summary Report{% endblock %}
+{% block extra_css %}<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 style="font-weight:700;color:var(--dark-red);margin:0;">Monthly Summary — {{ year }}</h5>
+  <form method="GET" class="d-flex gap-2">
+    <input type="number" name="year" value="{{ year }}" class="form-control" style="width:100px;" min="2020" max="2030">
+    <button type="submit" class="btn btn-primary">Go</button>
+  </form>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-md-8">
+    <div class="tcard p-4">
+      <h6 style="color:var(--dark-red);font-weight:700;margin-bottom:14px;"><i class="fas fa-chart-bar me-2"></i>Donations & Requests — {{ year }}</h6>
+      <canvas id="monthlyChart" height="200"></canvas>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="tcard p-4">
+      <h6 style="color:var(--dark-red);font-weight:700;margin-bottom:14px;">Year Summary</h6>
+      {% with total_don=0 total_req=0 total_ful=0 %}
+      <div class="info-row"><span class="info-label">Total Donations</span><span class="info-value" style="color:var(--red);">{% for d in data %}{{ d.donations|add:0 }}{% endfor %}</span></div>
+      <div class="info-row"><span class="info-label">Total Requests</span><span class="info-value" style="color:#1565c0;">{% for d in data %}{{ d.requests|add:0 }}{% endfor %}</span></div>
+      <div class="info-row"><span class="info-label">Fulfilled</span><span class="info-value" style="color:#27AE60;">{% for d in data %}{{ d.fulfilled|add:0 }}{% endfor %}</span></div>
+      {% endwith %}
+    </div>
+  </div>
+</div>
+<div class="tcard">
+  <div class="tcard-header"><span><i class="fas fa-table me-2"></i>Month-wise Data</span></div>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Month</th><th>Donations</th><th>Requests</th><th>Fulfilled</th><th>Fulfillment Rate</th></tr></thead>
+      <tbody>
+      {% for d in data %}
+      <tr>
+        <td><strong>{{ d.month }}</strong></td>
+        <td><span class="badge" style="background:#fff5f5;color:var(--dark-red);">{{ d.donations }}</span></td>
+        <td><span class="badge" style="background:#e3f2fd;color:#1565c0;">{{ d.requests }}</span></td>
+        <td><span class="badge badge-fulfilled rounded-pill">{{ d.fulfilled }}</span></td>
+        <td>
+          {% if d.requests > 0 %}
+          {% widthratio d.fulfilled d.requests 100 %}%
+          {% else %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const labels = [{% for d in data %}"{{ d.month }}",{% endfor %}];
+const donations = [{% for d in data %}{{ d.donations }},{% endfor %}];
+const requests  = [{% for d in data %}{{ d.requests }},{% endfor %}];
+new Chart(document.getElementById('monthlyChart'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [
+      { label:'Donations', data:donations, backgroundColor:'rgba(192,57,43,0.7)', borderRadius:5 },
+      { label:'Requests',  data:requests,  backgroundColor:'rgba(21,101,192,0.6)', borderRadius:5 },
+    ]
+  },
+  options: { responsive:true, scales:{ y:{ beginAtZero:true, ticks:{ stepSize:1 } } } }
+});
+</script>
+{% endblock %}

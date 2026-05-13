@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Request Report{% endblock %}
+{% block page_title %}<i class="fas fa-hand-holding-medical me-2"></i>Blood Request Report{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 style="font-weight:700;color:var(--dark-red);margin:0;">Request Report ({{ reqs.count }})</h5>
+  <a href="/reports/requests/?export=pdf" class="btn btn-primary"><i class="fas fa-file-pdf me-2"></i>Export PDF</a>
+</div>
+<div class="tcard">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>#</th><th>Req#</th><th>Patient</th><th>Blood Group</th><th>Units</th><th>Urgency</th><th>Status</th><th>Date</th><th>Fulfilled Date</th></tr></thead>
+      <tbody>
+      {% for r in reqs %}
+      <tr {% if r.urgency == 'emergency' %}style="background:#fff5f5;"{% endif %}>
+        <td>{{ forloop.counter }}</td>
+        <td><code>#{{ r.id }}</code></td>
+        <td>{{ r.patient.full_name }}</td>
+        <td><span class="badge bg-group">{{ r.blood_group }}</span></td>
+        <td>{{ r.units_required }}</td>
+        <td>{% if r.urgency == 'emergency' %}<span class="badge badge-emergency rounded-pill">Emergency</span>
+        {% elif r.urgency == 'urgent' %}<span class="badge badge-urgent rounded-pill">Urgent</span>
+        {% else %}<span class="badge badge-normal rounded-pill">Normal</span>{% endif %}</td>
+        <td>{% if r.status == 'fulfilled' %}<span class="badge badge-fulfilled rounded-pill">Fulfilled</span>
+        {% elif r.status == 'pending' %}<span class="badge badge-pending rounded-pill">Pending</span>
+        {% else %}<span class="badge badge-rejected rounded-pill">Rejected</span>{% endif %}</td>
+        <td>{{ r.request_date|date:"d-M-Y" }}</td>
+        <td>{{ r.fulfilled_date|date:"d-M-Y"|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9" class="text-center text-muted py-3">No requests found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

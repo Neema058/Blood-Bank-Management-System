@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Add User{% endblock %}
+{% block page_title %}<i class="fas fa-user-plus me-2"></i>Add New User{% endblock %}
+{% block extra_css %}
+<style>
+#patient-select-row { display:none; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-6">
+<div class="form-card">
+  <h5 style="color:var(--dark-red);font-weight:700;margin-bottom:20px;">Add User Account</h5>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label">First Name</label><input type="text" name="first_name" class="form-control" required></div>
+      <div class="col-md-6"><label class="form-label">Last Name</label><input type="text" name="last_name" class="form-control" required></div>
+      <div class="col-12"><label class="form-label">Username *</label><input type="text" name="username" class="form-control" required></div>
+      <div class="col-md-6">
+        <label class="form-label">Role *</label>
+        <select name="role" id="role-select" class="form-select" required onchange="togglePatientRow()">
+          <option value="receptionist">Receptionist</option>
+          <option value="lab_technician">Lab Technician</option>
+          <option value="admin">Admin</option>
+          <option value="patient">Patient</option>
+        </select>
+      </div>
+      <div class="col-md-6"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control"></div>
+
+      <div class="col-12" id="patient-select-row">
+        <label class="form-label">Link to Patient Record *</label>
+        <select name="patient_id" id="patient-id-select" class="form-select">
+          <option value="">-- Select Patient --</option>
+          {% for p in patients %}
+          <option value="{{ p.id }}">{{ p.full_name }} ({{ p.blood_group }}) — {{ p.hospital_name }}</option>
+          {% endfor %}
+        </select>
+        <div class="form-text">Patient must be registered first. <a href="/patients/add/" style="color:var(--red);">Register Patient →</a></div>
+      </div>
+
+      <div class="col-12"><label class="form-label">Password *</label><input type="password" name="password" class="form-control" required minlength="6"></div>
+    </div>
+
+    <div style="background:#fff5f5;border-radius:10px;padding:12px;margin:16px 0;font-size:.8rem;" id="role-info-box">
+      <i class="fas fa-info-circle me-2" style="color:var(--red);"></i>
+      <span id="role-info-text">Receptionist can register patients and submit blood requests.</span>
+    </div>
+
+    <div class="d-flex gap-2 mt-3">
+      <button type="submit" class="btn btn-primary flex-fill" style="padding:12px;"><i class="fas fa-save me-2"></i>Add User</button>
+      <a href="/accounts/users/" class="btn btn-outline-secondary flex-fill" style="border-radius:10px;padding:12px;">Cancel</a>
+    </div>
+  </form>
+</div>
+</div></div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const roleInfo = {
+  receptionist:   'Receptionist can register patients and submit blood requests on their behalf.',
+  lab_technician: 'Lab Technician can view donors, donations, inventory, and blood requests (read-only).',
+  admin:          'Admin has full access: approve/reject requests, manage users, view all reports.',
+  patient:        'Patient can log in to their own portal to submit and track their blood requests.',
+};
+function togglePatientRow() {
+  const role = document.getElementById('role-select').value;
+  const row  = document.getElementById('patient-select-row');
+  const sel  = document.getElementById('patient-id-select');
+  const info = document.getElementById('role-info-text');
+  row.style.display = (role === 'patient') ? 'block' : 'none';
+  sel.required      = (role === 'patient');
+  info.textContent  = roleInfo[role] || '';
+}
+togglePatientRow();
+</script>
+{% endblock %}

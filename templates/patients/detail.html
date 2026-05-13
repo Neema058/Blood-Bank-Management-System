@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}{{ patient.full_name }}{% endblock %}
+{% block page_title %}<i class="fas fa-hospital-user me-2"></i>Patient Profile{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="form-card text-center" style="background:linear-gradient(160deg,#5a0000,#C0392B);color:white;">
+      <div style="font-size:50px;margin-bottom:12px;">🏥</div>
+      <h5 style="font-weight:700;margin:0;">{{ patient.full_name }}</h5>
+      <p style="opacity:.7;font-size:.83rem;margin:4px 0;">{{ patient.get_gender_display }}, {{ patient.age }} years</p>
+      <span class="badge" style="background:white;color:var(--dark-red);font-size:.9rem;padding:6px 16px;margin-top:6px;">{{ patient.blood_group }}</span>
+      <hr style="border-color:rgba(255,255,255,.2);margin:16px 0;">
+      <div style="text-align:left;font-size:.83rem;">
+        <div class="info-row" style="border-color:rgba(255,255,255,.2);"><span style="opacity:.7;">Hospital</span><span>{{ patient.hospital_name }}</span></div>
+        <div class="info-row" style="border-color:rgba(255,255,255,.2);"><span style="opacity:.7;">Doctor</span><span>{{ patient.doctor_name|default:"N/A" }}</span></div>
+        <div class="info-row" style="border-color:rgba(255,255,255,.2);"><span style="opacity:.7;">Contact</span><span>{{ patient.contact }}</span></div>
+        <div class="info-row" style="border-color:rgba(255,255,255,.2);"><span style="opacity:.7;">Total Requests</span><span>{{ patient.total_requests }}</span></div>
+      </div>
+      <div class="mt-3 d-flex gap-2">
+        <a href="/patients/{{ patient.id }}/edit/" class="btn btn-warning btn-sm flex-fill" style="border-radius:8px;">Edit</a>
+        <a href="/requests/add/" class="btn btn-sm flex-fill" style="background:white;color:var(--dark-red);border-radius:8px;font-weight:600;">New Request</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="tcard">
+      <div class="tcard-header"><span><i class="fas fa-hand-holding-medical me-2"></i>Blood Request History</span></div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead><tr><th>Req#</th><th>Blood Group</th><th>Units</th><th>Urgency</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>
+          {% for r in requests %}
+          <tr>
+            <td><code>#{{ r.id }}</code></td>
+            <td><span class="badge bg-group">{{ r.blood_group }}</span></td>
+            <td>{{ r.units_required }}</td>
+            <td>
+              {% if r.urgency == 'emergency' %}<span class="badge badge-emergency rounded-pill">Emergency</span>
+              {% elif r.urgency == 'urgent' %}<span class="badge badge-urgent rounded-pill">Urgent</span>
+              {% else %}<span class="badge badge-normal rounded-pill">Normal</span>{% endif %}
+            </td>
+            <td>
+              {% if r.status == 'fulfilled' %}<span class="badge badge-fulfilled rounded-pill">✓ Fulfilled</span>
+              {% elif r.status == 'pending' %}<span class="badge badge-pending rounded-pill">Pending</span>
+              {% else %}<span class="badge badge-rejected rounded-pill">Rejected</span>{% endif %}
+            </td>
+            <td>{{ r.request_date|date:"d-M-Y" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center text-muted py-3">No requests yet.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

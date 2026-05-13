@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Donation #{{ donation.id }}{% endblock %}
+{% block page_title %}<i class="fas fa-tint me-2"></i>Donation Detail{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-7">
+<div class="form-card">
+  <h5 style="color:var(--dark-red);font-weight:700;margin-bottom:20px;">Donation Record #{{ donation.id }}</h5>
+  <div class="info-row"><span class="info-label">Donor</span><span class="info-value"><a href="/donors/{{ donation.donor.donor_id }}/" style="color:var(--red);">{{ donation.donor.full_name }}</a></span></div>
+  <div class="info-row"><span class="info-label">Blood Group</span><span class="info-value"><span class="badge bg-group">{{ donation.blood_group }}</span></span></div>
+  <div class="info-row"><span class="info-label">Donation Date</span><span class="info-value">{{ donation.donation_date|date:"d-M-Y" }}</span></div>
+  <div class="info-row"><span class="info-label">Volume</span><span class="info-value">{{ donation.volume_ml }} ml</span></div>
+  <div style="background:#f8f0f0;border-radius:10px;padding:14px;margin:16px 0;">
+    <h6 style="color:var(--dark-red);font-weight:700;margin-bottom:10px;">Test Results</h6>
+    <div class="row g-2 text-center">
+      <div class="col">
+        <div style="font-size:.72rem;color:#888;">HIV</div>
+        <div>{% if donation.hiv_test == 'pass' %}<span style="color:green;font-size:1.2rem;">✓</span>{% else %}<span style="color:red;font-size:1.2rem;">✗</span>{% endif %}</div>
+      </div>
+      <div class="col">
+        <div style="font-size:.72rem;color:#888;">Hep B</div>
+        <div>{% if donation.hep_b_test == 'pass' %}<span style="color:green;font-size:1.2rem;">✓</span>{% else %}<span style="color:red;font-size:1.2rem;">✗</span>{% endif %}</div>
+      </div>
+      <div class="col">
+        <div style="font-size:.72rem;color:#888;">Hep C</div>
+        <div>{% if donation.hep_c_test == 'pass' %}<span style="color:green;font-size:1.2rem;">✓</span>{% else %}<span style="color:red;font-size:1.2rem;">✗</span>{% endif %}</div>
+      </div>
+      <div class="col">
+        <div style="font-size:.72rem;color:#888;">Malaria</div>
+        <div>{% if donation.malaria_test == 'pass' %}<span style="color:green;font-size:1.2rem;">✓</span>{% else %}<span style="color:red;font-size:1.2rem;">✗</span>{% endif %}</div>
+      </div>
+      <div class="col">
+        <div style="font-size:.72rem;color:#888;">Syphilis</div>
+        <div>{% if donation.syphilis_test == 'pass' %}<span style="color:green;font-size:1.2rem;">✓</span>{% else %}<span style="color:red;font-size:1.2rem;">✗</span>{% endif %}</div>
+      </div>
+    </div>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Final Status</span>
+    <span class="info-value">{% if donation.status == 'accepted' %}<span class="badge badge-available rounded-pill">✓ Accepted — Added to Inventory</span>{% else %}<span class="badge badge-rejected rounded-pill">✗ Rejected — Test Failed</span>{% endif %}</span>
+  </div>
+  <div class="info-row"><span class="info-label">Recorded By</span><span class="info-value">{{ donation.recorded_by.get_full_name|default:"—" }}</span></div>
+  {% if donation.notes %}<div class="info-row"><span class="info-label">Notes</span><span class="info-value">{{ donation.notes }}</span></div>{% endif %}
+  <a href="/donations/" class="btn btn-outline-primary mt-3" style="border-radius:10px;">← Back to Donations</a>
+</div>
+</div></div>
+{% endblock %}

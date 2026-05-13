@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Donations{% endblock %}
+{% block page_title %}<i class="fas fa-tint me-2"></i>Donation Records{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 style="font-weight:700;color:var(--dark-red);margin:0;">All Donations</h5>
+  <a href="/donations/add/" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Record Donation</a>
+</div>
+<div class="tcard">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>#</th><th>Donor</th><th>Blood Group</th><th>Date</th><th>Volume</th><th>All Tests</th><th>Status</th><th>Recorded By</th></tr></thead>
+      <tbody>
+      {% for d in donations %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><a href="/donors/{{ d.donor.donor_id }}/" style="color:var(--red);font-weight:600;">{{ d.donor.full_name }}</a></td>
+        <td><span class="badge bg-group">{{ d.blood_group }}</span></td>
+        <td>{{ d.donation_date|date:"d-M-Y" }}</td>
+        <td>{{ d.volume_ml }} ml</td>
+        <td>{% if d.all_tests_passed %}<span style="color:green;font-weight:600;">✓ All Pass</span>{% else %}<span style="color:red;font-weight:600;">✗ Some Failed</span>{% endif %}</td>
+        <td>{% if d.status == 'accepted' %}<span class="badge badge-available rounded-pill">Accepted</span>
+        {% else %}<span class="badge badge-rejected rounded-pill">Rejected</span>{% endif %}</td>
+        <td>{{ d.recorded_by.get_full_name|default:d.recorded_by.username|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" class="text-center text-muted py-4">No donations recorded yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Inventory{% endblock %}
+{% block page_title %}<i class="fas fa-warehouse me-2"></i>Blood Inventory{% endblock %}
+{% block content %}
+
+{% if rare_alerts %}
+<div class="alert alert-warning mb-3" style="border-radius:12px;">
+  <i class="fas fa-star me-2" style="color:#E67E22;"></i><strong>Rare Blood Group Alert!</strong>
+  {% for ra in rare_alerts %}
+  <span class="badge ms-1" style="background:#E67E22;color:white;">{{ ra.blood_group }}: {{ ra.count }} units</span>
+  {% endfor %}
+  — Contact rare group donors immediately!
+</div>
+{% endif %}
+
+{% if near_expiry %}
+<div class="alert alert-warning mb-3" style="border-radius:12px;">
+  <i class="fas fa-clock me-2"></i><strong>{{ near_expiry.count }} unit(s)</strong> expiring within 7 days — issue or discard soon!
+</div>
+{% endif %}
+
+<!-- Stock Cards -->
+<div class="row g-2 mb-4">
+{% for bg, count in stock.items %}
+<div class="col-6 col-md-3">
+  <div class="bg-card {% if count < 5 %}critical{% elif count < 10 %}low{% else %}good{% endif %}">
+    <div style="font-size:1.5rem;">🩸</div>
+    <div class="group-name">{{ bg }}</div>
+    <div class="group-count {% if count < 5 %}count-critical{% elif count < 10 %}count-low{% else %}count-good{% endif %}">{{ count }}</div>
+    <div style="font-size:.7rem;color:#888;">available units</div>
+    {% if count < 5 %}<div class="badge badge-expired mt-1">Critical &lt; 5</div>
+    {% elif count < 10 %}<div class="badge" style="background:#fff3cd;color:#856404;">Low &lt; 10</div>
+    {% else %}<div class="badge badge-available mt-1">Good</div>{% endif %}
+  </div>
+</div>
+{% endfor %}
+</div>
+
+<!-- Filter -->
+<div class="tcard mb-3 p-3">
+  <form method="GET" class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <select name="bg" class="form-select">
+        <option value="">All Blood Groups</option>
+        {% for bg, label in blood_groups %}
+        <option value="{{ bg }}" {% if bg == bg_filter %}selected{% endif %}>{{ bg }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <select name="status" class="form-select">
+        <option value="available" {% if status_filter == 'available' %}selected{% endif %}>Available</option>
+        <option value="issued"    {% if status_filter == 'issued' %}selected{% endif %}>Issued</option>
+        <option value="expired"   {% if status_filter == 'expired' %}selected{% endif %}>Expired</option>
+        <option value="">All Status</option>
+      </select>
+    </div>
+    <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Filter</button></div>
+  </form>
+</div>
+
+<!-- Units Table -->
+<div class="tcard">
+  <div class="tcard-header">
+    <span><i class="fas fa-vials me-2"></i>Blood Units ({{ units.count }})</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead><tr><th>Unit ID</th><th>Blood Group</th><th>Collected</th><th>Expiry Date</th><th>Days Left</th><th>Status</th><th>Issued To</th></tr></thead>
+      <tbody>
+      {% for u in units %}
+      <tr {% if u.expiry_status == 'critical' and u.status == 'available' %}style="background:#fff5f5;"{% endif %}>
+        <td><code>#{{ u.id }}</code>{% if u.is_rare %} <span class="badge" style="background:#E67E22;color:white;font-size:.6rem;">Rare</span>{% endif %}</td>
+        <td><span class="badge bg-group">{{ u.blood_group }}</span></td>
+        <td>{{ u.collected_date|date:"d-M-Y" }}</td>
+        <td>{{ u.expiry_date|date:"d-M-Y" }}</td>
+        <td>
+          {% with days=u.days_to_expiry %}
+          {% if days < 0 %}<span style="color:#721c24;font-weight:700;">Expired</span>
+          {% elif days <= 7 %}<span style="color:#E67E22;font-weight:700;">{{ days }}d ⚠</span>
+          {% else %}<span style="color:#27AE60;font-weight:600;">{{ days }}d</span>{% endif %}
+          {% endwith %}
+        </td>
+        <td>
+          {% if u.status == 'available' %}<span class="badge badge-available rounded-pill">Available</span>
+          {% elif u.status == 'issued' %}<span class="badge badge-issued rounded-pill">Issued</span>
+          {% elif u.status == 'expired' %}<span class="badge badge-expired rounded-pill">Expired</span>
+          {% else %}<span class="badge badge-rejected rounded-pill">Rejected</span>{% endif %}
+        </td>
+        <td>{% if u.issued_to %}Patient: {{ u.issued_to.patient.full_name }}{% else %}—{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-center text-muted py-4">No units found.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

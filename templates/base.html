@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Blood Bank{% endblock %} | BBMS</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red:      #C0392B;
+  --dark-red: #922B21;
+  --light-red:#FADBD8;
+  --pale:     #FEF9F9;
+  --sidebar-w:260px;
+}
+* { font-family:'Poppins',sans-serif; box-sizing:border-box; }
+body { background:#f8f0f0; min-height:100vh; }
+
+/* SIDEBAR */
+.sidebar {
+  position:fixed; top:0; left:0; width:var(--sidebar-w); height:100vh;
+  background:linear-gradient(160deg,#5a0000 0%,#8b0000 50%,#C0392B 100%);
+  color:white; z-index:1000; overflow-y:auto;
+  box-shadow:4px 0 20px rgba(0,0,0,.35);
+}
+.sidebar-brand {
+  padding:20px 15px 14px; border-bottom:1px solid rgba(255,255,255,.15);
+  text-align:center;
+}
+.logo-drop {
+  font-size:42px; margin-bottom:8px; filter:drop-shadow(0 2px 6px rgba(0,0,0,.4));
+}
+.sidebar-brand h5 { font-size:.92rem; font-weight:700; margin:2px 0 0; }
+.sidebar-brand small { font-size:.65rem; opacity:.65; }
+.sidebar-section { padding:12px 18px 4px; font-size:.6rem; letter-spacing:2px; opacity:.5; text-transform:uppercase; }
+.sidebar-link {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 20px; color:rgba(255,255,255,.8);
+  text-decoration:none; font-size:.83rem; font-weight:500;
+  border-left:3px solid transparent; transition:all .2s;
+}
+.sidebar-link:hover,.sidebar-link.active {
+  background:rgba(255,255,255,.12); color:white;
+  border-left-color:#FADBD8;
+}
+.sidebar-link i { width:18px; text-align:center; }
+.badge-alert {
+  background:#fff; color:var(--red); border-radius:20px;
+  padding:1px 7px; font-size:.65rem; font-weight:700; margin-left:auto;
+}
+
+/* TOPBAR */
+.topbar {
+  position:fixed; top:0; left:var(--sidebar-w); right:0; height:60px;
+  background:white; z-index:999;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 25px; box-shadow:0 2px 12px rgba(192,57,43,.1);
+}
+.page-title { font-weight:600; color:var(--dark-red); font-size:1rem; }
+.user-pill {
+  background:var(--pale); border-radius:30px;
+  padding:6px 16px; font-size:.82rem; font-weight:500; color:var(--dark-red);
+}
+
+/* MAIN */
+.main-content { margin-left:var(--sidebar-w); margin-top:60px; padding:26px; }
+
+/* STAT CARDS */
+.stat-card {
+  border-radius:16px; border:none; background:white;
+  padding:20px 22px; box-shadow:0 4px 20px rgba(192,57,43,.08);
+  transition:transform .2s;
+}
+.stat-card:hover { transform:translateY(-3px); }
+.stat-icon {
+  width:50px; height:50px; border-radius:13px;
+  display:flex; align-items:center; justify-content:center; font-size:22px;
+  margin-bottom:12px;
+}
+.stat-num { font-size:1.9rem; font-weight:700; color:var(--dark-red); }
+.stat-label { font-size:.76rem; color:#888; font-weight:500; }
+
+/* TABLE CARD */
+.tcard { background:white; border-radius:16px; box-shadow:0 4px 20px rgba(192,57,43,.07); overflow:hidden; }
+.tcard-header {
+  background:linear-gradient(90deg,var(--dark-red),var(--red));
+  color:white; padding:14px 20px; font-weight:600; font-size:.88rem;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.table { margin:0; }
+.table th { background:#fff5f5; color:var(--dark-red); font-size:.76rem; font-weight:600; border:none; padding:10px 14px; }
+.table td { font-size:.81rem; vertical-align:middle; border-color:#fde8e8; padding:9px 14px; }
+
+/* BADGES */
+.bg-group { background:var(--red)!important; }
+.badge-available { background:#d4edda; color:#155724; }
+.badge-issued    { background:#d1ecf1; color:#0c5460; }
+.badge-expired   { background:#f8d7da; color:#721c24; }
+.badge-pending   { background:#fff3cd; color:#856404; }
+.badge-fulfilled { background:#d4edda; color:#155724; }
+.badge-rejected  { background:#f8d7da; color:#721c24; }
+.badge-emergency { background:#721c24; color:white; }
+.badge-normal    { background:#d1ecf1; color:#0c5460; }
+.badge-urgent    { background:#fff3cd; color:#856404; }
+.badge-eligible  { background:#d4edda; color:#155724; }
+.badge-not-eligible { background:#f8d7da; color:#721c24; }
+
+/* ALERTS */
+.emergency-banner {
+  background:linear-gradient(90deg,#721c24,#C0392B);
+  color:white; border-radius:12px; padding:14px 20px;
+  animation:pulse 1.5s infinite; margin-bottom:16px;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.85} }
+
+/* FORM */
+.form-card { background:white; border-radius:16px; padding:28px; box-shadow:0 4px 20px rgba(192,57,43,.08); }
+.form-label { font-weight:600; font-size:.83rem; color:#444; }
+.form-control,.form-select {
+  border-radius:10px; border:1.5px solid #fad7d7; font-size:.87rem; padding:10px 14px;
+}
+.form-control:focus,.form-select:focus {
+  border-color:var(--red); box-shadow:0 0 0 3px rgba(192,57,43,.12);
+}
+.btn-primary { background:var(--red); border:none; border-radius:10px; padding:10px 26px; font-weight:600; }
+.btn-primary:hover { background:var(--dark-red); }
+.btn-success { border-radius:10px; }
+.btn-danger  { border-radius:10px; }
+.btn-warning { border-radius:10px; }
+.btn-outline-primary { border-radius:10px; border-color:var(--red); color:var(--red); }
+.btn-outline-primary:hover { background:var(--red); color:white; }
+
+/* BLOOD GROUP CARDS */
+.bg-card {
+  border-radius:14px; padding:18px; text-align:center;
+  border:2px solid #fad7d7; background:white;
+  transition:all .2s; cursor:default;
+}
+.bg-card:hover { border-color:var(--red); transform:translateY(-2px); }
+.bg-card .group-name { font-size:1.6rem; font-weight:700; color:var(--dark-red); }
+.bg-card .group-count { font-size:2rem; font-weight:700; }
+.bg-card.critical { border-color:#721c24; background:#fff5f5; }
+.bg-card.low { border-color:#E67E22; background:#fffbf0; }
+.bg-card.good { border-color:#27AE60; }
+.count-critical { color:#721c24; }
+.count-low      { color:#E67E22; }
+.count-good     { color:#27AE60; }
+
+/* INFO ROW */
+.info-row { display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid #fde8e8; font-size:.84rem; }
+.info-row:last-child { border:none; }
+.info-label { color:#888; font-weight:500; }
+.info-value { font-weight:600; color:#333; }
+
+.alert { border-radius:12px; border:none; font-size:.84rem; }
+</style>
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo-drop">🩸</div>
+    <h5>Blood Bank</h5>
+    <small>Management System</small>
+  </div>
+
+  {% if user.role != 'patient' %}
+  <div class="sidebar-section">Main Menu</div>
+  <a href="/dashboard/" class="sidebar-link {% if '/dashboard/' in request.path %}active{% endif %}">
+    <i class="fas fa-tachometer-alt"></i> Dashboard
+  </a>
+
+  {% if user.role == 'admin' or user.role == 'receptionist' or user.role == 'lab_technician' %}
+  <div class="sidebar-section">Donors</div>
+  <a href="/donors/" class="sidebar-link {% if '/donors/' in request.path %}active{% endif %}">
+    <i class="fas fa-users"></i> Donors
+  </a>
+  {% endif %}
+  {% if user.role == 'admin' or user.role == 'lab_technician' %}
+  <a href="/donations/" class="sidebar-link {% if '/donations/' in request.path %}active{% endif %}">
+    <i class="fas fa-tint"></i> Donations
+  </a>
+  {% endif %}
+
+  <div class="sidebar-section">Blood Bank</div>
+  {% if user.role == 'admin' or user.role == 'receptionist' or user.role == 'lab_technician' %}
+  <a href="/inventory/" class="sidebar-link {% if '/inventory/' in request.path %}active{% endif %}">
+    <i class="fas fa-warehouse"></i> Inventory
+  </a>
+  {% endif %}
+  {% if user.role == 'admin' or user.role == 'receptionist' or user.role == 'lab_technician' %}
+  <a href="/requests/" class="sidebar-link {% if '/requests/' in request.path %}active{% endif %}">
+    <i class="fas fa-hand-holding-medical"></i> Blood Requests
+    {% if emergency_count %}<span class="badge-alert">{{ emergency_count }}</span>{% endif %}
+  </a>
+  {% endif %}
+
+  {% if user.role == 'admin' or user.role == 'receptionist' or user.role == 'lab_technician' %}
+  <div class="sidebar-section">Patients</div>
+  <a href="/patients/" class="sidebar-link {% if '/patients/' in request.path %}active{% endif %}">
+    <i class="fas fa-hospital-user"></i> Patients
+  </a>
+  {% endif %}
+
+  {% if user.role == 'admin' or user.role == 'lab_technician' %}
+  <div class="sidebar-section">Reports</div>
+  <a href="/reports/" class="sidebar-link {% if '/reports/' in request.path %}active{% endif %}">
+    <i class="fas fa-chart-bar"></i> Reports
+  </a>
+  {% endif %}
+
+  {% if user.role == 'admin' %}
+  <div class="sidebar-section">Admin</div>
+  <a href="/accounts/users/" class="sidebar-link {% if '/accounts/users' in request.path %}active{% endif %}">
+    <i class="fas fa-users-cog"></i> Manage Users
+  </a>
+  {% endif %}
+  {% endif %}{# end if not patient #}
+
+  <div class="sidebar-section">Account</div>
+  <a href="/accounts/change-password/" class="sidebar-link">
+    <i class="fas fa-lock"></i> Change Password
+  </a>
+  <a href="/accounts/logout/" class="sidebar-link" style="color:#ffb3b3;">
+    <i class="fas fa-sign-out-alt"></i> Logout
+  </a>
+</div>
+
+<div class="topbar">
+  <span class="page-title">{% block page_title %}Dashboard{% endblock %}</span>
+  <div class="user-pill">
+    <i class="fas fa-user-circle me-2"></i>
+    {{ user.get_full_name|default:user.username }}
+    <span class="badge ms-2" style="background:var(--red);color:white;font-size:.62rem;">{{ user.get_role_display }}</span>
+  </div>
+</div>
+{% endif %}
+
+<div class="{% if user.is_authenticated %}main-content{% else %}container py-5{% endif %}">
+  {% for msg in messages %}
+  <div class="alert alert-{% if msg.tags == 'error' %}danger{% else %}{{ msg.tags }}{% endif %} alert-dismissible fade show mb-3">
+    <i class="fas fa-{% if msg.tags == 'success' %}check-circle{% elif msg.tags == 'error' or msg.tags == 'danger' %}exclamation-circle{% elif msg.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+    {{ msg }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
